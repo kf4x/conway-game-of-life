@@ -2,9 +2,7 @@ package edu.javierc.model;
 
 import java.util.concurrent.ForkJoinPool;
 
-/**
- * Created by javierc on 8/31/15.
- */
+
 public class ForkJoinConnection extends Connection
 {
 
@@ -21,18 +19,19 @@ public class ForkJoinConnection extends Connection
   public void run ()
   {
     ForkJoinPool pool = new ForkJoinPool();
-    while (!interrupted())
+    while (!isInterrupted())
     {
 
-      GridTask fb = new GridTask(grid, 0, 999);
-      pool.invoke(fb);
+    GridTask fb = new GridTask(grid, 0, 999);
+    pool.invoke(fb);
 
-      synchronized (this)
+    synchronized (this)
+    {
+      if (!isInterrupted())
       {
         grid.commit();
-
       }
     }
-
+  }
   }
 }

@@ -44,29 +44,28 @@ public class Grid// extends GridTask // extends Thread
 //        displayGraph[3][2] = true;
 //        displayGraph[3][3] = true;
 
-    //glider
-//    displayGraph[1][2] = true;
-//    displayGraph[2][3] = true;
-//    displayGraph[3][1] = true;
-//    displayGraph[3][2] = true;
-//    displayGraph[3][3] = true;
+//    glider
+    displayGraph[1][2] = true;
+    displayGraph[2][3] = true;
+    displayGraph[3][1] = true;
+    displayGraph[3][2] = true;
+    displayGraph[3][3] = true;
 
-    Random random = new Random(3874);
-
-
-    for(int i = 0; i < rows; i++){
-      for(int j = 0; j < cols; j++){
-        if(random.nextDouble() > 0.6){
-          displayGraph[i][j] = true;
-        }
-      }
-    }
+//    Random random = new Random(3874);
+//
+//
+//    for(int i = 0; i < rows; i++){
+//      for(int j = 0; j < cols; j++){
+//        if(random.nextDouble() > 0.6){
+//          displayGraph[i][j] = true;
+//        }
+//      }
+//    }
 
   }
 
   public boolean getCell (int x, int y)
   {
-//    return volatileGraph[y][x];
     return displayGraph[y][x];
   }
 

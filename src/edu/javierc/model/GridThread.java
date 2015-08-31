@@ -1,21 +1,17 @@
 package edu.javierc.model;
 
-/**
- * Created by javierc on 8/31/15.
- */
+
 public class GridThread extends Thread
 {
 
   private boolean[][] displayGraph;
   private boolean[][] volatileGraph;
-  private Grid grid;
   private int rows;
   private int cols;
   private int y, dy;
 
   public GridThread (Grid display, int y, int dy)
   {
-    this.grid= display;
     this.displayGraph = display.getGrid();
     this.volatileGraph = display.getVolatileGraph();
     this.cols = display.getWidth();
