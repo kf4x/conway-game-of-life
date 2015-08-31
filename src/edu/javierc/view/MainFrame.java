@@ -6,6 +6,7 @@
 package edu.javierc.view;
 
 
+import edu.javierc.model.ConnectionType;
 import edu.javierc.model.Grid;
 import edu.javierc.model.GridConnectionHandler;
 
@@ -29,7 +30,7 @@ public class MainFrame extends JFrame
     init();
     grid = new Grid(1000, 1000);
     panel.setGrid(grid);
-    connectionHandler = new GridConnectionHandler(grid);
+    connectionHandler = new GridConnectionHandler(grid, ConnectionType.SIMPLE);
 
   }
 

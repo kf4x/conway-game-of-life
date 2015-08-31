@@ -12,8 +12,8 @@ public class GridConnectionHandler
   public GridConnectionHandler (Grid grid, ConnectionType type)
   {
     this.conType = type;
-    c = getConnection();
     this.grid = grid;
+    setConnection();
   }
 
   public void start(){
@@ -23,7 +23,7 @@ public class GridConnectionHandler
     }
     else
     {
-      c = getConnection();
+      setConnection();
       c.start();
     }
   }
@@ -37,17 +37,15 @@ public class GridConnectionHandler
   }
 
 
-  private Connection getConnection(){
+  private void setConnection(){
     if (this.conType == ConnectionType.SIMPLE)
     {
-      return new SimpleThreadedConnection(grid, 0, 1000);
+      c = new SimpleThreadedConnection(grid, 0, 1000);
     }
     else if (this.conType == ConnectionType.FORK_JOIN)
     {
 
     }
-
-    return null;
   }
 
 
