@@ -3,7 +3,7 @@ package edu.javierc.model;
 
 import java.util.Random;
 
-public class Grid// extends GridTasks // extends Thread
+public class Grid// extends GridTask // extends Thread
 {
   private boolean[][] volatileGraph;// = new Cell[10000][10000];
   private boolean[][] displayGraph;// = new Cell[10000][10000];

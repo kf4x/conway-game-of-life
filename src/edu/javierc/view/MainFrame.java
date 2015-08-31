@@ -23,6 +23,7 @@ public class MainFrame extends JFrame
   private JButton playButton = new JButton("Play");
   private JButton nextButton = new JButton("Next");
   private JButton resetButton = new JButton("Reset");
+  private JRadioButton threaded, forkJoin;
 
 
   public MainFrame ()
@@ -30,8 +31,9 @@ public class MainFrame extends JFrame
     init();
     grid = new Grid(1000, 1000);
     panel.setGrid(grid);
-    connectionHandler = new GridConnectionHandler(grid, ConnectionType.SIMPLE);
-
+    connectionHandler = new GridConnectionHandler(grid,
+                                                  ConnectionType.SIMPLE);
+//
   }
 
   /**
@@ -66,7 +68,29 @@ public class MainFrame extends JFrame
     menuBar.add(nextButton);
     menuBar.add(resetButton);
 
+    forkJoin = new JRadioButton("Fork Join");
+    menuBar.add(forkJoin);
+    forkJoin.addActionListener(e -> {
+      if (!connectionHandler.isRunning())
+      {
+        connectionHandler = new GridConnectionHandler(grid,
+                                                      ConnectionType.FORK_JOIN);
+      }
+    });
 
+    threaded = new JRadioButton("Threaded");
+    menuBar.add(threaded);
+    threaded.setSelected(true);
+    threaded.addActionListener(e -> {
+      if (!connectionHandler.isRunning())
+      {
+        connectionHandler = new GridConnectionHandler(grid,
+                                                      ConnectionType.SIMPLE);
+      }
+    });
+    ButtonGroup group = new ButtonGroup();
+    group.add(forkJoin);
+    group.add(threaded);
 
     setJMenuBar(menuBar);
     setLayout(new BorderLayout(0, 0));
@@ -79,11 +103,16 @@ public class MainFrame extends JFrame
   {
     if (connectionHandler.isRunning()){
       connectionHandler.stop();
+      forkJoin.setEnabled(true);
+      threaded.setEnabled(true);
       playButton.setText("Play");
     }
     else
     {
       connectionHandler.start();
+      forkJoin.setEnabled(false);
+      threaded.setEnabled(false);
+
       playButton.setText("Pause");
     }
   }

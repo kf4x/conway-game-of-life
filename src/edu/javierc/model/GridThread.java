@@ -1,9 +1,10 @@
 package edu.javierc.model;
 
-
-public class GridTasks extends Thread
+/**
+ * Created by javierc on 8/31/15.
+ */
+public class GridThread extends Thread
 {
-
 
   private boolean[][] displayGraph;
   private boolean[][] volatileGraph;
@@ -12,7 +13,7 @@ public class GridTasks extends Thread
   private int cols;
   private int y, dy;
 
-  public GridTasks(Grid display, int y, int dy)
+  public GridThread (Grid display, int y, int dy)
   {
     this.grid= display;
     this.displayGraph = display.getGrid();
@@ -117,4 +118,5 @@ public class GridTasks extends Thread
   {
     update();
   }
+
 }

@@ -44,7 +44,7 @@ public class GridConnectionHandler
     }
     else if (this.conType == ConnectionType.FORK_JOIN)
     {
-
+      c = new ForkJoinConnection(grid, 0 , 1000);
     }
   }
 

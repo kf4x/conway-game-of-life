@@ -20,13 +20,13 @@ public class SimpleThreadedConnection extends Connection
       while (!isInterrupted())
       {
 
-        GridTasks[] tasks = new GridTasks[4];
+        GridThread[] tasks = new GridThread[4];
 
         for (int i = 0; i < tasks.length; i++)
         {
           int max = grid.getHeight();
           int f = i == 0 ? 0 : 1;
-          tasks[i] = new GridTasks(grid, i * max + f, (max / tasks.length) + max % tasks.length);
+          tasks[i] = new GridThread(grid, i * max + f, (max / tasks.length) + max % tasks.length);
           tasks[i].start();
         }
 
