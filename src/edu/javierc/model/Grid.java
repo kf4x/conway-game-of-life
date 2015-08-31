@@ -5,8 +5,8 @@ import java.util.Random;
 
 public class Grid// extends GridTask // extends Thread
 {
-  private boolean[][] volatileGraph;// = new Cell[10000][10000];
-  private boolean[][] displayGraph;// = new Cell[10000][10000];
+  private volatile boolean[][] volatileGraph;// = new Cell[10000][10000];
+  private volatile boolean[][] displayGraph;// = new Cell[10000][10000];
   private int rows = 0;
   private  int cols = 0;
 
@@ -45,28 +45,34 @@ public class Grid// extends GridTask // extends Thread
 //        displayGraph[3][3] = true;
 
 //    glider
-    displayGraph[1][2] = true;
-    displayGraph[2][3] = true;
-    displayGraph[3][1] = true;
-    displayGraph[3][2] = true;
-    displayGraph[3][3] = true;
+//    displayGraph[1][2] = true;
+//    displayGraph[2][3] = true;
+//    displayGraph[3][1] = true;
+//    displayGraph[3][2] = true;
+//    displayGraph[3][3] = true;
 
-//    Random random = new Random(3874);
-//
-//
-//    for(int i = 0; i < rows; i++){
-//      for(int j = 0; j < cols; j++){
-//        if(random.nextDouble() > 0.6){
-//          displayGraph[i][j] = true;
-//        }
-//      }
-//    }
+    Random random = new Random(3874);
+
+
+    for(int i = 0; i < rows; i++){
+      for(int j = 0; j < cols; j++){
+        if(random.nextDouble() > 0.5){
+          displayGraph[i][j] = true;
+        }
+        else{
+          displayGraph[i][j] = false;
+        }
+      }
+    }
 
   }
 
   public boolean getCell (int x, int y)
   {
-    return displayGraph[y][x];
+    synchronized (displayGraph)
+    {
+      return displayGraph[y][x];
+    }
   }
 
   public boolean[][] getVolatileGraph ()

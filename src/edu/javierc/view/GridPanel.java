@@ -99,8 +99,6 @@ public class GridPanel extends JPanel implements ActionListener
     @Override
     public void mouseClicked (MouseEvent e)
     {
-      System.out.println("getWidth() = " + getWidth());
-
       int currCol = e.getX()/ (getWidth() / zoom);
       int currRow = e.getY()/ (getHeight() / zoom);
 
