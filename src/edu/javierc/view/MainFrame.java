@@ -7,6 +7,7 @@ package edu.javierc.view;
 
 
 import edu.javierc.model.Grid;
+import edu.javierc.model.GridConnectionHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,7 +27,7 @@ public class MainFrame extends JFrame
   public MainFrame ()
   {
     init();
-    grid = new Grid(1000,1000);
+    grid = new Grid(10000, 10000);
     panel.setGrid(grid);
     //    for(i = 0; i < threads.length; i++)
     //      threads[i].join();
@@ -57,10 +58,15 @@ public class MainFrame extends JFrame
     menu.add(menuItem);
     playButton.addActionListener(e -> start());
 
+
+
     menuBar.add(menu);
     menuBar.add(playButton);
     menuBar.add(nextButton);
     menuBar.add(resetButton);
+
+
+
     setJMenuBar(menuBar);
     setLayout(new BorderLayout(0, 0));
     add(panel);
@@ -70,54 +76,8 @@ public class MainFrame extends JFrame
 
   private void start ()
   {
-    threads = new Thread[4];
-    threads[0] = new Thread(() -> {
-      while (true)
-      {
-        grid.threadSafeUpdate(0, 250);
-        System.out.println("done 0");
-      }
-    });
-    threads[0].start();
-
-    threads[1] = new Thread(() -> {
-      while (true)
-      {
-        grid.threadSafeUpdate(250 + 1, 500);
-        System.out.println("done 1");
-      }
-    });
-    threads[1].start();
-
-    threads[2] = new Thread(() -> {
-      while (true)
-      {
-        grid.threadSafeUpdate(500 + 1, 750);
-        System.out.println("done 2");
-      }
-    });
-    threads[2].start();
-
-    threads[3] = new Thread(() -> {
-      while (true)
-      {
-        grid.threadSafeUpdate(750 + 1, 1000 - 1);
-        System.out.println("done 3");
-
-        grid.commit();
-
-      }
-    });
-    threads[3].start();
-
-
-//      grid.commit();
-
-
-//    System.out.println("done");
-//    start();
-    //      threads[i].join();
-
+    GridConnectionHandler connectionHandler = new GridConnectionHandler(grid);
+    connectionHandler.start();
   }
 
   private void showOptionFrame ()
@@ -131,7 +91,12 @@ public class MainFrame extends JFrame
 
     JComboBox presets = new JComboBox(presetList);
     final JFrame optionFrame = new JFrame();
+
+
+
     GridLayout experimentLayout = new GridLayout(0, 3, 5, 0);
+
+
 //    GridLayout sizeLayout = new GridLayout(0, 2, 5, 0);
 
     optionFrame.setLayout(experimentLayout);

@@ -10,6 +10,7 @@ import java.awt.event.*;
 public class GridPanel extends JPanel implements ActionListener
 {
 
+
   private Grid grid;
   private Timer timer = new Timer(160, this);
   private static int zoom = 1;
@@ -29,6 +30,8 @@ public class GridPanel extends JPanel implements ActionListener
     {
       paintCells((Graphics2D) g);
     }
+
+
   }
 
   /**
@@ -60,11 +63,11 @@ public class GridPanel extends JPanel implements ActionListener
     int width = getWidth();
     int height = getHeight();
 
-    int cellSizeW = width / (zoom);
-    int cellSizeH = height / (zoom);
+    int cellSizeW = width / zoom;
+    int cellSizeH = height / zoom;
 
     // here we need to determine whether i draw only zoomed or what
-    for (int row = 0; row < zoom; ++row)
+    for (int row = viewY; row < zoom; ++row)
     {
       for (int col = viewX; col < zoom; ++col)
       {
@@ -98,9 +101,33 @@ public class GridPanel extends JPanel implements ActionListener
 
 
     @Override
+    public void mouseClicked (MouseEvent e)
+    {
+      System.out.println("getWidth() = " + getWidth());
+
+      int currCol = e.getX()/ (getWidth() / zoom);
+      int currRow = e.getY()/ (getHeight() / zoom);
+
+      grid.toggleCell(currRow, currCol);
+
+    }
+
+    @Override
     public void mousePressed(MouseEvent e) {
       previousY = e.getY();
       prevX = e.getX();
+
+
+
+
+      int width = getWidth();
+      int height = getHeight();
+      if (e.getX() < 0 || e.getY() < 0 || e.getX() > width || e.getY() > height)
+      {
+        return;
+      }
+
+
     }
 
     @Override
