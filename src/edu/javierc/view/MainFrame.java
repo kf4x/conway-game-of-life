@@ -17,7 +17,7 @@ public class MainFrame extends JFrame
 {
   private GridPanel panel = new GridPanel();
   private JMenuBar menuBar = new JMenuBar();
-  private Thread[] threads; // = new Thread[4];
+  GridConnectionHandler connectionHandler;
   private Grid grid;
   private JButton playButton = new JButton("Play");
   private JButton nextButton = new JButton("Next");
@@ -27,10 +27,10 @@ public class MainFrame extends JFrame
   public MainFrame ()
   {
     init();
-    grid = new Grid(10000, 10000);
+    grid = new Grid(1000, 1000);
     panel.setGrid(grid);
-    //    for(i = 0; i < threads.length; i++)
-    //      threads[i].join();
+    connectionHandler = new GridConnectionHandler(grid);
+
   }
 
   /**
@@ -76,8 +76,15 @@ public class MainFrame extends JFrame
 
   private void start ()
   {
-    GridConnectionHandler connectionHandler = new GridConnectionHandler(grid);
-    connectionHandler.start();
+    if (connectionHandler.isRunning()){
+      connectionHandler.stop();
+      playButton.setText("Play");
+    }
+    else
+    {
+      connectionHandler.start();
+      playButton.setText("Pause");
+    }
   }
 
   private void showOptionFrame ()
@@ -126,7 +133,7 @@ public class MainFrame extends JFrame
 //      panel.setGrid(grid);
       // parse the string into an int
       int userThreads = Integer.parseInt(userThreadsInput);
-      threads = new Thread[userThreads];
+
       // get rid of the dialog
       optionFrame.dispose();
     });

@@ -1,51 +1,56 @@
 package edu.javierc.model;
 
 
-import java.util.concurrent.ForkJoinPool;
 
 public class GridConnectionHandler
 {
-  Connection c;
-  public GridConnectionHandler (Grid grid)
-  {
-    c = new Connection(grid, 0 , 1000);
+  private Connection c;
+  private Grid grid;
+  private ConnectionType conType;
 
+
+  public GridConnectionHandler (Grid grid, ConnectionType type)
+  {
+    this.conType = type;
+    c = getConnection();
+    this.grid = grid;
   }
 
   public void start(){
-    c.start();
+    if (c.getState() == Thread.State.NEW)
+    {
+      c.start();
+    }
+    else
+    {
+      c = getConnection();
+      c.start();
+    }
+  }
+
+  public boolean isRunning(){
+    return c.isAlive();
+  }
+
+  public void stop(){
+    c.interrupt();
   }
 
 
-  private class Connection extends Thread {
-
-    private Grid grid;
-
-    public Connection(Grid grid, int y, int dy)
+  private Connection getConnection(){
+    if (this.conType == ConnectionType.SIMPLE)
     {
-      this.grid = grid;
+      return new SimpleThreadedConnection(grid, 0, 1000);
     }
-
-    @Override
-    public void run ()
+    else if (this.conType == ConnectionType.FORK_JOIN)
     {
-      ForkJoinPool pool = new ForkJoinPool();
-      while (!interrupted())
-      {
-        //        GridTasks[] subUpdaters = new GridTasks[4];
-        GridTasks fb = new GridTasks(grid, 0, 999);
-        pool.invoke(fb);
-
-        synchronized (this)
-        {
-          grid.commit();
-
-        }
-      }
 
     }
 
+    return null;
   }
+
+
 
 
 }

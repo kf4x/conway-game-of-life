@@ -1,9 +1,7 @@
 package edu.javierc.model;
 
 
-import java.util.concurrent.RecursiveAction;
-
-public class GridTasks extends RecursiveAction
+public class GridTasks extends Thread
 {
 
 
@@ -114,19 +112,9 @@ public class GridTasks extends RecursiveAction
     }
   }
 
-  protected static int sThreshold = 500;
-
   @Override
-  protected void compute ()
+  public void run ()
   {
-    if ((dy-y) < sThreshold) {
-      update();
-      return;
-    }
-
-    int split = (dy-y) / 2;
-
-    invokeAll(new GridTasks(grid, y, split),
-              new GridTasks(grid, y + split, (dy-y) - split));
+    update();
   }
 }

@@ -30,8 +30,6 @@ public class GridPanel extends JPanel implements ActionListener
     {
       paintCells((Graphics2D) g);
     }
-
-
   }
 
   /**
@@ -78,8 +76,6 @@ public class GridPanel extends JPanel implements ActionListener
         int y = cellSizeH * row;
 
         b.paint(g, x, y, cellSizeW, cellSizeH);
-
-
 
       }
     }

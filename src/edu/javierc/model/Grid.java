@@ -82,9 +82,10 @@ public class Grid// extends GridTasks // extends Thread
 
   public void commit ()
   {
-      displayGraph = null;
+      //displayGraph = null;
       displayGraph = getVolatileGraph();
       volatileGraph = new boolean[rows][cols];
+
   }
 
   public void setCell(boolean value, int x, int y)
