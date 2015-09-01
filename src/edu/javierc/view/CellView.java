@@ -32,10 +32,15 @@ public class CellView implements CellBase
     return cell.isAlive();
   }
 
-  public void paint (Graphics2D g, int x, int y, int cellSizeW, int cellSizeH)
+
+  public void paint (Graphics2D g, int x, int y, int cellSizeW, int
+          cellSizeH, boolean boarder)
   {
-    cellSizeH -=2;
-    cellSizeW -=2;
+    if (boarder)
+    {
+      cellSizeH -= 2;
+      cellSizeW -= 2;
+    }
 
     if (!cell.isAlive())
     {
@@ -43,7 +48,7 @@ public class CellView implements CellBase
     }
     else
     {
-      g.setColor(Color.green);
+      g.setColor(Color.GREEN);
     }
 
     g.drawRect(x, y, cellSizeW, cellSizeH);

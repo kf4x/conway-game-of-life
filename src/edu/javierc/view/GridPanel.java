@@ -1,6 +1,7 @@
 package edu.javierc.view;
 
-import edu.javierc.model.Grid;
+
+import edu.javierc.model.GridConnectionHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,10 +11,9 @@ import java.awt.event.*;
 public class GridPanel extends JPanel implements ActionListener
 {
 
-
-  private Grid grid;
-  private Timer timer = new Timer(160, this);
-  private static int zoom = 1;
+  private GridConnectionHandler connectionHandler;
+  private Timer timer = new Timer(120, this);
+  private static int zoom = 50;
   private static int viewX = 0, viewY = 0;
 
   public GridPanel ()
@@ -26,19 +26,19 @@ public class GridPanel extends JPanel implements ActionListener
   @Override
   public void paint (Graphics g)
   {
-    if (grid != null)
+    if (connectionHandler != null)
     {
       paintCells((Graphics2D) g);
     }
   }
 
   /**
-   * Set a reference to a grid.
-   * @param grid reference to a Grid object.
+   * Set a reference to a connectionHandler.
+   * @param connectionHandler reference to a Grid object.
    */
-  public void setGrid (Grid grid)
+  public void setConnectionHandler (GridConnectionHandler connectionHandler)
   {
-    this.grid = grid;
+    this.connectionHandler = connectionHandler;
   }
 
   @Override
@@ -51,7 +51,7 @@ public class GridPanel extends JPanel implements ActionListener
   }
 
   /**
-   * Draws the "view port" that will be displayed as a grid.
+   * Draws the "view port" that will be displayed as a connectionHandler.
    * Also takes into account zoom and dragging
    * @param g Graphics2D object from paint method
    */
@@ -69,13 +69,19 @@ public class GridPanel extends JPanel implements ActionListener
     {
       for (int col = viewX; col < zoom; ++col)
       {
-        CellView b = new CellView(grid.getCell(row, col), col, row);
+
+        boolean cellValue = connectionHandler.getCellValue(row, col);
+        CellView cell = new CellView(cellValue, col, row);
 
 
         int x = cellSizeW * col;
         int y = cellSizeH * row;
+        if (zoom > 50)
+        {
+          cell.paint(g, x, y, cellSizeW, cellSizeH, false);
+        }
+        cell.paint(g, x, y, cellSizeW, cellSizeH, true);
 
-        b.paint(g, x, y, cellSizeW, cellSizeH);
 
       }
     }
@@ -93,7 +99,7 @@ public class GridPanel extends JPanel implements ActionListener
    */
   protected class MouseActions extends MouseAdapter
   {
-    int previousY, prevX;
+    int previousY, previousX;
 
 
     @Override
@@ -102,17 +108,14 @@ public class GridPanel extends JPanel implements ActionListener
       int currCol = e.getX()/ (getWidth() / zoom);
       int currRow = e.getY()/ (getHeight() / zoom);
 
-      grid.toggleCell(currRow, currCol);
+      connectionHandler.toggleCell(currRow, currCol);
 
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
       previousY = e.getY();
-      prevX = e.getX();
-
-
-
+      previousX = e.getX();
 
       int width = getWidth();
       int height = getHeight();
@@ -129,36 +132,29 @@ public class GridPanel extends JPanel implements ActionListener
 
       int y = e.getY() ;
       int x = e.getX();
+      int cellWidth = getWidth()/zoom;
+      int cellHeight = getHeight()/zoom;
 
-      if (y < 0)
+      if(Math.abs(e.getX()-previousX)
+              >= cellWidth || Math.abs(e.getY()-previousY) >= cellHeight)
       {
-        return;
+        if (Math.abs(e.getX()-previousX) >= cellWidth)
+        {
+          viewX--;
+        }
+        else
+        {
+          viewX++;
+        }
+
+        if (Math.abs(e.getY()-previousY) >= cellHeight)
+        {
+          viewY--;
+        }
       }
 
-      if (x < 0)
-      {
-        return;
-      }
 
-      if (y < previousY)
-      {
-        viewY++;
-      }
-      else if (y > previousY)
-      {
-        viewY--;
-      }
-      previousY = y;
 
-      if (x < prevX)
-      {
-        viewX--;
-      }
-      else if (x > prevX)
-      {
-        viewX++;
-      }
-      prevX = x;
     }
 
     @Override
@@ -166,6 +162,12 @@ public class GridPanel extends JPanel implements ActionListener
     {
 
       int notches = e.getWheelRotation();
+      if (e.isShiftDown())
+      {
+        zoom++;
+        return;
+      }
+
       if (notches < 0)
       {
         if (zoom < 50)

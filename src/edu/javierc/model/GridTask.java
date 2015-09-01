@@ -14,6 +14,18 @@ public class GridTask extends RecursiveAction
   private int cols;
   private int y, dy;
 
+  public GridTask (Grid display)
+  {
+    this.grid= display;
+    this.displayGraph = display.getGrid();
+    this.volatileGraph = display.getVolatileGraph();
+    this.cols = display.getWidth();
+    this.rows = display.getHeight();
+    this.y = 0;
+    this.dy = rows;
+  }
+
+
   public GridTask (Grid display, int y, int dy)
   {
     this.grid= display;
@@ -113,12 +125,12 @@ public class GridTask extends RecursiveAction
       }
     }
   }
-  protected static int sThreshold = 1000;
+  protected static int threshold = 1000;
 
   @Override
   protected void compute ()
   {
-    if ((dy-y) < sThreshold) {
+    if ((dy-y) < threshold) {
       update();
       return;
     }

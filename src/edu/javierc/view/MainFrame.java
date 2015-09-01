@@ -9,16 +9,18 @@ package edu.javierc.view;
 import edu.javierc.model.ConnectionType;
 import edu.javierc.model.Grid;
 import edu.javierc.model.GridConnectionHandler;
+import edu.javierc.io.Serializer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.InputStream;
 
 
 public class MainFrame extends JFrame
 {
   private GridPanel panel = new GridPanel();
   private JMenuBar menuBar = new JMenuBar();
-  GridConnectionHandler connectionHandler;
+  private GridConnectionHandler connectionHandler;
   private Grid grid;
   private JButton playButton = new JButton("Play");
   private JButton nextButton = new JButton("Next");
@@ -29,11 +31,12 @@ public class MainFrame extends JFrame
   public MainFrame ()
   {
     init();
-    grid = new Grid(1000, 1000);
-    panel.setGrid(grid);
+    grid = new Grid(2000, 2000);
+
     connectionHandler = new GridConnectionHandler(grid,
                                                   ConnectionType.SIMPLE);
-//
+    panel.setConnectionHandler(connectionHandler);
+
   }
 
   /**
@@ -66,6 +69,9 @@ public class MainFrame extends JFrame
     menuBar.add(menu);
     menuBar.add(playButton);
     menuBar.add(nextButton);
+    nextButton.addActionListener(e1 -> {
+      connectionHandler.step();
+    });
     menuBar.add(resetButton);
 
     forkJoin = new JRadioButton("Fork Join");
@@ -119,22 +125,35 @@ public class MainFrame extends JFrame
 
   private void showOptionFrame ()
   {
-    final String presetList[] = {"one", "two", "three", "four"};
+    final String[] presetList = {
+            "Choose preset",
+            "Glider",
+            "Glider Gun",
+            "Gun star",
+            "Breeder1",
+            "Turing machine",
+            "Hacksaw"};
+
+    final String fileNames[] = {
+            "",
+            "glider",
+            "glider-gun",
+            "gunstar",
+            "breeder1",
+            "turing-machine",
+            "hacksaw"};
+
+    connectionHandler.stop();
 
     JButton button = new JButton("Save");
     JTextField threadNumberTextField = new JTextField("4", 3);
-    JTextField gridXTextField = new JTextField("10000", 3);
-    JTextField gridYTextField = new JTextField("10000", 3);
+    JTextField gridXTextField = new JTextField("2000", 3);
+    JTextField gridYTextField = new JTextField("2000", 3);
 
     JComboBox presets = new JComboBox(presetList);
+
     final JFrame optionFrame = new JFrame();
-
-
-
     GridLayout experimentLayout = new GridLayout(0, 3, 5, 0);
-
-
-//    GridLayout sizeLayout = new GridLayout(0, 2, 5, 0);
 
     optionFrame.setLayout(experimentLayout);
 
@@ -153,16 +172,50 @@ public class MainFrame extends JFrame
     optionFrame.setLocationRelativeTo(null); //center on screen
 
     button.addActionListener(e -> {
+      connectionHandler.removeConnection();
+
       // get the input
       String userThreadsInput = threadNumberTextField.getText();
-      String userGridXInput = threadNumberTextField.getText();
-      String userGridYInput = threadNumberTextField.getText();
+      String userGridXInput = gridXTextField.getText();
+      String userGridYInput = gridYTextField.getText();
+
       int gridCols = Integer.parseInt(userGridXInput);
       int gridRows = Integer.parseInt(userGridYInput);
-//      grid = new Grid(gridRows, gridCols);
-//      panel.setGrid(grid);
-      // parse the string into an int
       int userThreads = Integer.parseInt(userThreadsInput);
+      int itemIndex = presets.getSelectedIndex();
+
+      // if they chose a file
+      if (itemIndex > 0)
+      {
+        Grid serialized = null;
+        Serializer s = new Serializer();
+        InputStream f = getClass().getClassLoader().getResourceAsStream(
+                "assets/" + fileNames[itemIndex]);
+
+        try
+        {
+
+          serialized = s.decode(f);
+
+        }
+        catch (Exception e1) {
+          System.out.println(e1.getMessage());
+        }
+
+        grid = new Grid(gridCols, gridRows, false);
+        grid.mergeMatrix(serialized.getGrid(), 0 , 0);
+      }
+      else
+      {
+        grid = new Grid(gridCols, gridRows);
+      }
+
+      connectionHandler = new GridConnectionHandler(grid,
+                                                    ConnectionType.SIMPLE,
+                                                    userThreads);
+
+      panel.setConnectionHandler(null);
+      panel.setConnectionHandler(connectionHandler);
 
       // get rid of the dialog
       optionFrame.dispose();

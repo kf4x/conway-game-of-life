@@ -3,12 +3,12 @@ package edu.javierc.model;
 
 import java.util.Random;
 
-public class Grid// extends GridTask // extends Thread
+public class Grid
 {
   private volatile boolean[][] volatileGraph;// = new Cell[10000][10000];
   private volatile boolean[][] displayGraph;// = new Cell[10000][10000];
   private int rows = 0;
-  private  int cols = 0;
+  private int cols = 0;
 
 
   public Grid ()
@@ -16,52 +16,80 @@ public class Grid// extends GridTask // extends Thread
     this(10000, 10000);
   }
 
-  public Grid (int row, int col)
+  public Grid (int rows, int cols)
   {
 
-    rows = row;
-    cols = col;
+    this.rows = rows;
+    this.cols = cols;
     displayGraph = new boolean[rows][cols];
     volatileGraph = new boolean[rows][cols];
 
-//    for (int i = 0; i < rows; i++)
-//    {
-//
-//      for (int j = 0; j < cols; j++)
-//      {
-//        displayGraph[i][j] = false;
-//        volatileGraph[i][j] = false;
-//      }
-//    }
-//    displayGraph[1][2] = true;
-//    displayGraph[2][2] = true;
-//    displayGraph[3][2] = true;
-//    displayGraph[4][2] = true;
+    seed();
+  }
 
-//        displayGraph[1][2] = true;
-//        displayGraph[2][3] = true;
-//        displayGraph[3][1] = true;
-//        displayGraph[3][2] = true;
-//        displayGraph[3][3] = true;
+  public Grid (int rows, int cols, boolean seedGrid)
+  {
+    this.rows = rows;
+    this.cols = cols;
+    displayGraph = new boolean[rows][cols];
+    volatileGraph = new boolean[rows][cols];
 
-//    glider
-//    displayGraph[1][2] = true;
-//    displayGraph[2][3] = true;
-//    displayGraph[3][1] = true;
-//    displayGraph[3][2] = true;
-//    displayGraph[3][3] = true;
-
-    Random random = new Random(3874);
-
-
-    for(int i = 0; i < rows; i++){
-      for(int j = 0; j < cols; j++){
-        if(random.nextDouble() > 0.5){
-          displayGraph[i][j] = true;
-        }
-        else{
+    if (seedGrid)
+    {
+      seed();
+    }
+    else{
+      for (int i = 0; i < rows; i++)
+      {
+        for (int j = 0; j < cols; j++)
+        {
           displayGraph[i][j] = false;
         }
+      }
+    }
+  }
+
+  public void mergeGrid(Grid grid)
+  {
+    int height = grid.getHeight();
+    int width = grid.getWidth();
+
+    // Should throw an exception the grid being merded is too big
+    if (height > this.rows || width > this.cols)
+    {
+      return;
+    }
+    for (int i = 0; i < height; i++)
+    {
+      for (int j = 0; j < width; j++)
+      {
+        displayGraph[i][j] = grid.getCell(j,i);
+      }
+    }
+
+  }
+
+  public void mergeMatrix(boolean[][] matrix, int x, int y)
+  {
+    int height = matrix.length;
+    int width = matrix[0].length;
+
+    // Should throw an exception the grid being merded is too big
+    if (height > this.rows || width > this.cols)
+    {
+      System.out.println("Too Big for current matrix");
+      return;
+    }
+
+    this.rows = height;
+    this.cols = width;
+
+    for (int i = y; i < height; i++)
+    {
+      for (int j = x; j < width; j++)
+      {
+
+        displayGraph[i][j] = matrix[i][j];
       }
     }
 
@@ -69,10 +97,7 @@ public class Grid// extends GridTask // extends Thread
 
   public boolean getCell (int x, int y)
   {
-    synchronized (displayGraph)
-    {
-      return displayGraph[y][x];
-    }
+    return displayGraph[y][x];
   }
 
   public boolean[][] getVolatileGraph ()
@@ -90,7 +115,6 @@ public class Grid// extends GridTask // extends Thread
       //displayGraph = null;
       displayGraph = getVolatileGraph();
       volatileGraph = new boolean[rows][cols];
-
   }
 
   public void setCell(boolean value, int x, int y)
@@ -112,4 +136,22 @@ public class Grid// extends GridTask // extends Thread
   {
     return rows;
   }
+
+  private void seed ()
+  {
+    Random random = new Random();
+
+
+    for(int i = 0; i < rows; i++){
+      for(int j = 0; j < cols; j++){
+        if(random.nextDouble() > 0.5){
+          displayGraph[i][j] = true;
+        }
+        else{
+          displayGraph[i][j] = false;
+        }
+      }
+    }
+  }
+
 }

@@ -36,6 +36,7 @@ public class Cell implements CellBase
   public void toggleLife(){
     status = !status;
   }
+
   @Override
   public Point getGraphLocation ()
   {

@@ -5,25 +5,30 @@ import java.util.concurrent.ForkJoinPool;
 
 public class ForkJoinConnection extends Connection
 {
-
-
+  private ForkJoinPool pool = new ForkJoinPool();
   private Grid grid;
-
-  public ForkJoinConnection (Grid grid, int y, int dy)
+  private GridTask task;
+  public ForkJoinConnection (Grid grid)
   {
     this.grid = grid;
+    this.task = new GridTask(grid);
   }
 
 
   @Override
   public void run ()
   {
-    ForkJoinPool pool = new ForkJoinPool();
     while (!isInterrupted())
     {
+      step();
+    }
+  }
 
-    GridTask fb = new GridTask(grid, 0, 999);
-    pool.invoke(fb);
+  @Override
+  public void step ()
+  {
+    task = new GridTask(grid);
+    pool.invoke(task);
 
     synchronized (this)
     {
@@ -33,5 +38,5 @@ public class ForkJoinConnection extends Connection
       }
     }
   }
-  }
+
 }
