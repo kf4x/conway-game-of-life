@@ -10,10 +10,12 @@ import edu.javierc.model.ConnectionType;
 import edu.javierc.model.Grid;
 import edu.javierc.model.GridConnectionHandler;
 import edu.javierc.io.Serializer;
-
 import javax.swing.*;
 import java.awt.*;
-import java.io.InputStream;
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
 
 
 public class MainFrame extends JFrame
@@ -136,24 +138,37 @@ public class MainFrame extends JFrame
 
   private void showOptionFrame ()
   {
-    final String[] presetList = {
-            "Choose preset",
-            "Glider",
-            "Glider Gun",
-            "Gun star",
-            "Breeder1",
-            "Turing machine",
-            "Hacksaw"};
+    ArrayList<File> bords = new ArrayList<>();
 
-    final String fileNames[] = {
-            "",
-            "glider",
-            "glider-gun",
-            "gunstar",
-            "breeder1",
-            "turing-machine",
-            "hacksaw"};
 
+    URL url = MainFrame.class.getResource("../../../assets/");
+
+    if (url == null) {
+      // error - missing folder
+    } else {
+      File dir = null;
+      try
+      {
+        dir = new File(url.toURI());
+      }
+      catch (URISyntaxException e)
+      {
+        e.printStackTrace();
+      }
+      for (File nextFile : dir.listFiles()) {
+        bords.add(nextFile);
+      }
+    }
+
+    String[] names = new String[bords.size()];
+    for (int i = 0; i < bords.size(); i++)
+    {
+      int pos = bords.get(i).getName().lastIndexOf(".");
+      if(pos != -1) {
+        names[i] = bords.get(i).getName().substring(0, pos);
+      }
+
+    }
     connectionHandler.stop();
 
     JButton button = new JButton("Save");
@@ -161,7 +176,7 @@ public class MainFrame extends JFrame
     JTextField gridXTextField = new JTextField("2000", 3);
     JTextField gridYTextField = new JTextField("2000", 3);
 
-    JComboBox presets = new JComboBox(presetList);
+    JComboBox presets = new JComboBox(names);
 
     final JFrame optionFrame = new JFrame();
     GridLayout experimentLayout = new GridLayout(0, 3, 5, 0);
@@ -183,6 +198,7 @@ public class MainFrame extends JFrame
     optionFrame.setLocationRelativeTo(null); //center on screen
 
     button.addActionListener(e -> {
+      connectionHandler.stop();
       connectionHandler.removeConnection();
 
       // get the input
@@ -200,29 +216,27 @@ public class MainFrame extends JFrame
       {
         Grid serialized = null;
         Serializer s = new Serializer();
-        InputStream f = getClass().getClassLoader().getResourceAsStream(
-                "assets/" + fileNames[itemIndex]);
-
         try
         {
 
-          serialized = s.decode(f);
+          serialized = s.decode(bords.get(itemIndex));
 
+          this.setTitle("Conway Game of Life - " + names[itemIndex]);
         }
-        catch (Exception e1) {
-          System.out.println(e1.getMessage());
+        catch (Exception e1)
+        {
         }
 
         grid = new Grid(gridCols, gridRows, false);
-        grid.mergeMatrix(serialized.getGrid(), 0 , 0);
+        grid.mergeMatrix(serialized.getGrid(), 0, 0);
       }
       else
       {
         grid = new Grid(gridCols, gridRows);
+        this.setTitle("Conway Game of Life");
       }
 
-      connectionHandler = new GridConnectionHandler(grid,
-                                                    ConnectionType.SIMPLE,
+      connectionHandler = new GridConnectionHandler(grid, ConnectionType.SIMPLE,
                                                     userThreads);
 
       panel.setConnectionHandler(null);
