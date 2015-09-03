@@ -113,7 +113,8 @@ public class Grid
   public void commit ()
   {
       //displayGraph = null;
-      displayGraph = getVolatileGraph();
+      displayGraph = volatileGraph;
+
       volatileGraph = new boolean[rows][cols];
   }
 
@@ -153,5 +154,6 @@ public class Grid
       }
     }
   }
+
 
 }

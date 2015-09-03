@@ -4,6 +4,7 @@ package edu.javierc.io;
  * http://www.conwaylife.com/wiki/Run_Length_Encoded
  * http://copy.sh/life/
  * https://github.com/copy/life/tree/master/examples
+ *
  */
 
 
@@ -17,6 +18,7 @@ public class Serializer
 {
 
   private Grid grid = new Grid(2000, 2000, false);
+  // taken from RLE wiki
   private static int LINE = 70;
   private static char LIVE = 'o';
   private static char DEAD = 'b';
@@ -64,7 +66,7 @@ public class Serializer
           {
             if (currentY < 1000 && currentX < 1000)
             {
-              grid.setCell(true, currentY+1, currentX+1);
+              grid.setCell(true, currentX+1, currentY+1);
 
             }
             currentX++;

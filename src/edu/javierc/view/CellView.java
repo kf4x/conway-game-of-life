@@ -6,6 +6,7 @@ import edu.javierc.model.CellBase;
 
 import java.awt.*;
 
+
 public class CellView implements CellBase
 {
 
@@ -33,26 +34,25 @@ public class CellView implements CellBase
   }
 
 
-  public void paint (Graphics2D g, int x, int y, int cellSizeW, int
+  public void paint (Graphics g, int x, int y, int cellSizeW, int
           cellSizeH, boolean boarder)
   {
     if (boarder)
     {
-      cellSizeH -= 2;
-      cellSizeW -= 2;
+      cellSizeH -= 1;
+      cellSizeW -= 1;
     }
 
-    if (!cell.isAlive())
-    {
-      g.setColor(Color.BLACK);
-    }
-    else
+    if (cell.isAlive())
     {
       g.setColor(Color.GREEN);
+      if (cellSizeH <= 1 || cellSizeW <= 1){
+        g.drawRect(x, y, 0, 0);
+      }
+      else
+      {
+        g.fillRect(x, y, cellSizeW, cellSizeH);
+      }
     }
-
-    g.drawRect(x, y, cellSizeW, cellSizeH);
-    g.fillRect(x, y, cellSizeW, cellSizeH);
-
   }
 }

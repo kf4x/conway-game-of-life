@@ -2,17 +2,27 @@ package edu.javierc.model;
 
 public abstract class Connection extends Thread
 {
-  protected int dy;
+  protected final int overflow;
+  protected final int dy;
   protected int y;
-  protected int threads;
+  protected final int threads;
   protected boolean step;
+  protected Grid grid;
 
-  public void setThreads(int threads)
-  {
-    this.threads = threads;
-  }
 
   abstract void step() throws InterruptedException;
+
+  public Connection(Grid grid, int threads)
+  {
+    this.grid = grid;
+    this.threads = threads;
+
+    int arrayLength = grid.getHeight();
+    dy = (int) Math.ceil( ((double)arrayLength) / threads);
+    overflow = (arrayLength % dy); // + (dy * threads);
+    System.out.println(dy);
+    System.out.println(overflow);
+  }
 
 //  abstract boolean getCell (int x, int y);
 //

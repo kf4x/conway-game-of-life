@@ -1,16 +1,19 @@
 package edu.javierc.model;
 
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 
 public class ForkJoinConnection extends Connection
 {
-  private ForkJoinPool pool = new ForkJoinPool();
+  private ForkJoinPool pool;
   private Grid grid;
   private GridTask task;
-  public ForkJoinConnection (Grid grid)
+  public ForkJoinConnection (Grid grid, int threads)
   {
+    super(grid, threads);
     this.grid = grid;
+    pool = new ForkJoinPool(threads);
     this.task = new GridTask(grid);
   }
 

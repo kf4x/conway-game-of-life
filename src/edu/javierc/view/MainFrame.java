@@ -25,7 +25,7 @@ public class MainFrame extends JFrame
   private JButton playButton = new JButton("Play");
   private JButton nextButton = new JButton("Next");
   private JButton resetButton = new JButton("Reset");
-  private JRadioButton threaded, forkJoin;
+  private JRadioButton threaded, forkJoin, exeService;
 
 
   public MainFrame ()
@@ -94,13 +94,24 @@ public class MainFrame extends JFrame
                                                       ConnectionType.SIMPLE);
       }
     });
+    exeService = new JRadioButton("Executor Service");
+    menuBar.add(exeService);
+    exeService.addActionListener(e -> {
+      if (!connectionHandler.isRunning())
+      {
+        connectionHandler = new GridConnectionHandler(grid,
+                                                      ConnectionType.EXECUTOR);
+      }
+    });
     ButtonGroup group = new ButtonGroup();
     group.add(forkJoin);
     group.add(threaded);
+    group.add(exeService);
 
     setJMenuBar(menuBar);
     setLayout(new BorderLayout(0, 0));
     add(panel);
+
     pack();
 
   }

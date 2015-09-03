@@ -125,7 +125,7 @@ public class GridTask extends RecursiveAction
       }
     }
   }
-  protected static int threshold = 1000;
+  protected static int threshold = 2000;
 
   @Override
   protected void compute ()

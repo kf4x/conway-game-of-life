@@ -6,6 +6,7 @@ import edu.javierc.model.GridConnectionHandler;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.VolatileImage;
 
 
 public class GridPanel extends JPanel implements ActionListener
@@ -15,6 +16,7 @@ public class GridPanel extends JPanel implements ActionListener
   private Timer timer = new Timer(120, this);
   private static int zoom = 50;
   private static int viewX = 0, viewY = 0;
+  private VolatileImage image;
 
   public GridPanel ()
   {
@@ -22,18 +24,45 @@ public class GridPanel extends JPanel implements ActionListener
     init();
   }
 
+  private void createBackBuffer ()
+  {
+    GraphicsConfiguration gc = getGraphicsConfiguration();
+    image = gc.createCompatibleVolatileImage(getWidth(), getHeight());
+  }
 
   @Override
   public void paint (Graphics g)
   {
-    if (connectionHandler != null)
+    createBackBuffer();
+    do
     {
-      paintCells((Graphics2D) g);
+
+      GraphicsConfiguration gc = this.getGraphicsConfiguration();
+      int valCode = image.validate(gc);
+
+      // This means the device doesn't match up to this hardware accelerated image.
+      if (valCode == VolatileImage.IMAGE_INCOMPATIBLE)
+      {
+        createBackBuffer(); // recreate the hardware accelerated image.
+      }
+
+      Graphics offscreenGraphics = image.getGraphics();
+      offscreenGraphics.setColor(Color.BLACK);
+      offscreenGraphics.fillRect(0, 0, getWidth(), getHeight());
+      paintCells(offscreenGraphics);
+
+      // paint back buffer to main graphics
+      g.drawImage(image, 0, 0, null);
+
     }
+    while (image.contentsLost());
+
+
   }
 
   /**
    * Set a reference to a connectionHandler.
+   *
    * @param connectionHandler reference to a Grid object.
    */
   public void setConnectionHandler (GridConnectionHandler connectionHandler)
@@ -51,47 +80,62 @@ public class GridPanel extends JPanel implements ActionListener
   }
 
   /**
-   * Draws the "view port" that will be displayed as a connectionHandler.
-   * Also takes into account zoom and dragging
-   * @param g Graphics2D object from paint method
    */
-  private void paintCells(Graphics2D g){
-    super.paintComponent(g);
+  private void paintCells (Graphics g)
+  {
+    //super.paintComponent(g);
 
     int width = getWidth();
     int height = getHeight();
 
-    int cellSizeW = width / zoom;
-    int cellSizeH = height / zoom;
+    int cellSizeW = width / (zoom);
+    int cellSizeH = height / (zoom);
+    if(zoom >= 15){
+      g.translate(cellSizeH+2, cellSizeW+2);
+
+    }
 
     // here we need to determine whether i draw only zoomed or what
-    for (int row = viewY; row < zoom; ++row)
+    for (int row = 0; row < zoom; ++row)
     {
-      for (int col = viewX; col < zoom; ++col)
+      for (int col = 0; col < zoom; ++col)
       {
-
-        boolean cellValue = connectionHandler.getCellValue(row, col);
-        CellView cell = new CellView(cellValue, col, row);
-
-
         int x = cellSizeW * col;
         int y = cellSizeH * row;
-        if (zoom > 50)
+
+        if (((x + cellSizeW+2) >= width-cellSizeW ||
+                (y + cellSizeH+2) >= height-cellSizeH) && zoom > 15)
+        {
+          break;
+        }
+
+        boolean cellValue = connectionHandler.getCellValue(col + viewX,
+                                                           row + viewY);
+        CellView cell = new CellView(cellValue, col + viewX, row + viewY);
+
+
+        if (zoom >= 51)
         {
           cell.paint(g, x, y, cellSizeW, cellSizeH, false);
+
         }
-        cell.paint(g, x, y, cellSizeW, cellSizeH, true);
-
-
+        else
+        {
+          cell.paint(g, x, y, cellSizeW, cellSizeH, true);
+        }
       }
     }
+
   }
+
+
   private void init ()
   {
     MouseActions mouse = new MouseActions();
     addMouseListener(mouse);
     addMouseMotionListener(mouse);
     addMouseWheelListener(mouse);
+    setBackground(Color.BLACK);
   }
 
   /**
@@ -99,62 +143,71 @@ public class GridPanel extends JPanel implements ActionListener
    */
   protected class MouseActions extends MouseAdapter
   {
-    int previousY, previousX;
+    Point mouseDownPoint;
 
 
     @Override
     public void mouseClicked (MouseEvent e)
     {
-      int currCol = e.getX()/ (getWidth() / zoom);
-      int currRow = e.getY()/ (getHeight() / zoom);
-
-      connectionHandler.toggleCell(currRow, currCol);
-
+      int currCol = e.getX() / (getWidth() / zoom);
+      int currRow = e.getY() / (getHeight() / zoom);
+      connectionHandler.toggleCell(currCol, currRow);
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
-      previousY = e.getY();
-      previousX = e.getX();
+    public void mousePressed (MouseEvent e)
+    {
+      mouseDownPoint = e.getPoint();
+    }
 
-      int width = getWidth();
-      int height = getHeight();
-      if (e.getX() < 0 || e.getY() < 0 || e.getX() > width || e.getY() > height)
+    @Override
+    public void mouseDragged (MouseEvent e)
+    {
+      // setting the sensitivity to the width of the square
+      int graphicalTranslation = (zoom <= 5) ? 5 : zoom;
+      int SENSITIVITY = getWidth() / graphicalTranslation;
+
+      boolean horizontalTravel = mouseDownPoint.getX() > e.getX();
+      boolean verticalTravel = mouseDownPoint.getY() > e.getY();
+
+      boolean inRangeX = Math.abs(
+              mouseDownPoint.getX() - e.getX()) > SENSITIVITY;
+      boolean inRangeY = Math.abs(
+              mouseDownPoint.getY() - e.getY()) > SENSITIVITY;
+
+
+      if (inRangeX && horizontalTravel && inRangeY && verticalTravel)
       {
+        viewX++;
+        viewY++;
+        return;
+      }
+      if (inRangeX && horizontalTravel)
+      {
+        // increment horizontal
+        viewX++;
+        return;
+      }
+      if (inRangeX && !horizontalTravel)
+      {
+
+        viewX = (viewX <= 0) ? 0 : (viewX - 1);
+        return;
+
+      }
+      if (inRangeY && verticalTravel)
+      {
+        viewY++;
+        repaint();
         return;
       }
 
-
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-
-      int y = e.getY() ;
-      int x = e.getX();
-      int cellWidth = getWidth()/zoom;
-      int cellHeight = getHeight()/zoom;
-
-      if(Math.abs(e.getX()-previousX)
-              >= cellWidth || Math.abs(e.getY()-previousY) >= cellHeight)
+      if (inRangeY && !verticalTravel)
       {
-        if (Math.abs(e.getX()-previousX) >= cellWidth)
-        {
-          viewX--;
-        }
-        else
-        {
-          viewX++;
-        }
-
-        if (Math.abs(e.getY()-previousY) >= cellHeight)
-        {
-          viewY--;
-        }
+        viewY = (viewY <= 0) ? 0 : (viewY - 1);
+        repaint();
+        return;
       }
-
-
-
     }
 
     @Override
@@ -162,24 +215,27 @@ public class GridPanel extends JPanel implements ActionListener
     {
 
       int notches = e.getWheelRotation();
-      if (e.isShiftDown())
+
+      if (e.isShiftDown() && notches < 0)
       {
-        zoom++;
+        ++zoom;
         return;
       }
 
-      if (notches < 0)
+      else if (notches < 0 && zoom < 50)
       {
+        // zoom out
         if (zoom < 50)
         {
-          zoom++;
+          ++zoom;
         }
       }
-      else
+      else if (notches > 0 && zoom > 1)
       {
+        // zoom in
         if (zoom > 1)
         {
-          zoom--;
+          --zoom;
         }
       }
     }

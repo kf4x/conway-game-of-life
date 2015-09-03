@@ -14,7 +14,7 @@ public class GameOfLife
       MainFrame frame = new MainFrame();
 
       frame.setVisible(true);
-      frame.setSize(720, 720);
+      frame.setSize(700, 700);
       frame.setLocationRelativeTo(null);
       frame.setTitle("Conway Game of Life");
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

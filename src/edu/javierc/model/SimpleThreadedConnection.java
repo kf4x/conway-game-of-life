@@ -1,24 +1,28 @@
 package edu.javierc.model;
 
 
+
 public class SimpleThreadedConnection extends Connection
 {
 
-  private Grid grid;
   private GridThread[] tasks;
+
 
   public SimpleThreadedConnection (Grid grid)
   {
     this(grid, 4);
   }
+
   public SimpleThreadedConnection (Grid grid, int threads)
   {
-    this.grid = grid;
-    this.threads = threads;
-    tasks  = new GridThread[threads];
+    super(grid, threads);
+    tasks = new GridThread[threads];
   }
-  @Override
-  public void run ()
+
+
+    @Override
+    public void run ()
+
   {
     try
     {
@@ -35,16 +39,17 @@ public class SimpleThreadedConnection extends Connection
   {
     for (int i = 0; i < tasks.length; i++)
     {
-      int max = grid.getHeight();
-      int f = i == 0 ? 0 : 1;
-      int fy = i == tasks.length - 1 ? tasks.length : i + 1;
-      int start = (i * (max / tasks.length)) + f;
-      int end = (fy * (max / tasks.length)) + max % tasks.length;
-      end = i == tasks.length - 1 ? end - 1 : end;
-
-      tasks[i] = new GridThread(grid, start, end);
+      if (threads-1 == i)
+      {
+        tasks[i] = new GridThread(grid, i * dy, ((dy*i+1)+ overflow) - 1);
+      }
+      else
+      {
+        tasks[i] = new GridThread(grid, i * dy, (dy*(i+1)) - 1);
+      }
       tasks[i].start();
     }
+
 
     for (GridThread task : tasks)
     {

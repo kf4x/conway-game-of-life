@@ -5,5 +5,5 @@ package edu.javierc.model;
  */
 public enum ConnectionType
 {
-  SIMPLE, FORK_JOIN
+  SIMPLE, FORK_JOIN, EXECUTOR
 }

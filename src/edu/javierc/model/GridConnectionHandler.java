@@ -77,15 +77,18 @@ public class GridConnectionHandler
     }
     else if (this.conType == ConnectionType.FORK_JOIN)
     {
-      c = new ForkJoinConnection(grid);
+      c = new ForkJoinConnection(grid, threads);
+    }
+    else if (this.conType == ConnectionType.EXECUTOR)
+    {
+      c = new ExecutorServiceConnection(grid, threads);
     }
   }
 
   public void setPreferredThreads (int preferredThreads)
   {
     this.threads = preferredThreads;
-    c.setThreads(threads);
-
+    setConnection();
   }
 
   public void step ()
