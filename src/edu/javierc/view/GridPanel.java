@@ -99,11 +99,9 @@ public class GridPanel extends JPanel implements ActionListener
                                                            row + viewY);
         CellView cell = new CellView(cellValue, col + viewX, row + viewY);
 
-
         if (zoom >= 5)
         {
           cell.paint(g, x, y, zoom, zoom, true);
-
         }
         else
         {
@@ -150,7 +148,7 @@ public class GridPanel extends JPanel implements ActionListener
     public void mouseDragged (MouseEvent e)
     {
       // setting the sensitivity to the width of the square
-      int graphicalTranslation = (zoom <= 15) ? getWidth() : zoom;
+      int graphicalTranslation = (zoom <= 10) ? getWidth() : zoom;
       int SENSITIVITY = getWidth() / graphicalTranslation;
       int cellsX = getWidth() / zoom;
       int cellsY = getHeight() / zoom;
@@ -165,17 +163,20 @@ public class GridPanel extends JPanel implements ActionListener
               mouseDownPoint.getY() - e.getY()) > SENSITIVITY;
 
 
-//      if (inRangeX && horizontalTravel && inRangeY && verticalTravel)
-//      {
-//
-//        return;
-//      }
-//
-//      if (inRangeX && !horizontalTravel && inRangeY && !verticalTravel)
-//      {
-//
-//        return;
-//      }
+      if (inRangeX && horizontalTravel && inRangeY && verticalTravel)
+      {
+        viewX = (1999 <= (cellsX+viewX+20)) ? viewX : (viewX + 20);
+        viewY = (1999 <= (cellsY+viewY +20)) ? viewY : (viewY + 20);
+        return;
+      }
+
+      if (inRangeX && !horizontalTravel && inRangeY && !verticalTravel)
+      {
+        viewX = (0 <= (viewX -20)) ? (viewX - 20) : 0;
+        viewY = (0 <= (viewY-20)) ? (viewY - 20) : 0;
+
+        return;
+      }
       if (inRangeX && !horizontalTravel)
       {
         viewX = (0 <= (viewX -20)) ? (viewX - 20) : 0;
