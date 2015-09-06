@@ -14,7 +14,7 @@ public class GridPanel extends JPanel implements ActionListener
 
   private GridConnectionHandler connectionHandler;
   private Timer timer = new Timer(120, this);
-  private static int zoom = 50;
+  private static int zoom = 1;
   private static int viewX = 0, viewY = 0;
   private VolatileImage image;
 
@@ -83,49 +83,34 @@ public class GridPanel extends JPanel implements ActionListener
    */
   private void paintCells (Graphics g)
   {
-    //super.paintComponent(g);
 
-    int width = getWidth();
-    int height = getHeight();
+    int cellsX = getWidth() / zoom;
+    int cellsY = getHeight() / zoom;
 
-    int cellSizeW = width / (zoom);
-    int cellSizeH = height / (zoom);
-    if(zoom >= 15){
-      g.translate(cellSizeH+2, cellSizeW+2);
-
-    }
-
-    // here we need to determine whether i draw only zoomed or what
-    for (int row = 0; row < zoom; ++row)
+    for (int row = 0; row < cellsY; ++row)
     {
-      for (int col = 0; col < zoom; ++col)
+      for (int col = 0; col < cellsX; ++col)
       {
-        int x = cellSizeW * col;
-        int y = cellSizeH * row;
 
-        if (((x + cellSizeW+2) >= width-cellSizeW ||
-                (y + cellSizeH+2) >= height-cellSizeH) && zoom > 15)
-        {
-          break;
-        }
+        int x = zoom * col;
+        int y = zoom * row;
 
         boolean cellValue = connectionHandler.getCellValue(col + viewX,
                                                            row + viewY);
         CellView cell = new CellView(cellValue, col + viewX, row + viewY);
 
 
-        if (zoom >= 51)
+        if (zoom >= 5)
         {
-          cell.paint(g, x, y, cellSizeW, cellSizeH, false);
+          cell.paint(g, x, y, zoom, zoom, true);
 
         }
         else
         {
-          cell.paint(g, x, y, cellSizeW, cellSizeH, true);
+          cell.paint(g, x, y, zoom, zoom, false);
         }
       }
     }
-
   }
 
 
@@ -160,12 +145,16 @@ public class GridPanel extends JPanel implements ActionListener
       mouseDownPoint = e.getPoint();
     }
 
+
     @Override
     public void mouseDragged (MouseEvent e)
     {
       // setting the sensitivity to the width of the square
-      int graphicalTranslation = (zoom <= 5) ? 5 : zoom;
+      int graphicalTranslation = (zoom <= 15) ? getWidth() : zoom;
       int SENSITIVITY = getWidth() / graphicalTranslation;
+      int cellsX = getWidth() / zoom;
+      int cellsY = getHeight() / zoom;
+
 
       boolean horizontalTravel = mouseDownPoint.getX() > e.getX();
       boolean verticalTravel = mouseDownPoint.getY() > e.getY();
@@ -176,36 +165,36 @@ public class GridPanel extends JPanel implements ActionListener
               mouseDownPoint.getY() - e.getY()) > SENSITIVITY;
 
 
-      if (inRangeX && horizontalTravel && inRangeY && verticalTravel)
-      {
-        viewX++;
-        viewY++;
-        return;
-      }
-      if (inRangeX && horizontalTravel)
-      {
-        // increment horizontal
-        viewX++;
-        return;
-      }
+//      if (inRangeX && horizontalTravel && inRangeY && verticalTravel)
+//      {
+//
+//        return;
+//      }
+//
+//      if (inRangeX && !horizontalTravel && inRangeY && !verticalTravel)
+//      {
+//
+//        return;
+//      }
       if (inRangeX && !horizontalTravel)
       {
-
-        viewX = (viewX <= 0) ? 0 : (viewX - 1);
+        viewX = (0 <= (viewX -20)) ? (viewX - 20) : 0;
         return;
 
       }
       if (inRangeY && verticalTravel)
       {
-        viewY++;
-        repaint();
+        viewY = (1999 <= (cellsY+viewY +20)) ? viewY : (viewY + 20);
         return;
       }
-
+      if (inRangeX && horizontalTravel)
+      {
+        viewX = (1999 <= (cellsX+viewX+20)) ? viewX : (viewX + 20);
+        return;
+      }
       if (inRangeY && !verticalTravel)
       {
-        viewY = (viewY <= 0) ? 0 : (viewY - 1);
-        repaint();
+        viewY = (0 <= (viewY-20)) ? (viewY - 20) : 0;
         return;
       }
     }
@@ -213,24 +202,26 @@ public class GridPanel extends JPanel implements ActionListener
     @Override
     public void mouseWheelMoved (MouseWheelEvent e)
     {
-
       int notches = e.getWheelRotation();
 
-      if (e.isShiftDown() && notches < 0)
+      if (e.isShiftDown())
       {
-        ++zoom;
-        return;
+        if (notches < 0)
+        {
+          ++zoom;
+        }
       }
 
       else if (notches < 0 && zoom < 50)
       {
+
         // zoom out
         if (zoom < 50)
         {
           ++zoom;
         }
       }
-      else if (notches > 0 && zoom > 1)
+      else if (notches > 0 && zoom >= 2)
       {
         // zoom in
         if (zoom > 1)

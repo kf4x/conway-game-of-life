@@ -28,6 +28,7 @@ public class MainFrame extends JFrame
   private JButton nextButton = new JButton("Next");
   private JButton resetButton = new JButton("Reset");
   private JRadioButton threaded, forkJoin, exeService;
+  private int userThreads=4;
 
 
   public MainFrame ()
@@ -82,7 +83,8 @@ public class MainFrame extends JFrame
       if (!connectionHandler.isRunning())
       {
         connectionHandler = new GridConnectionHandler(grid,
-                                                      ConnectionType.FORK_JOIN);
+                                                      ConnectionType.FORK_JOIN,
+                                                      userThreads);
       }
     });
 
@@ -93,7 +95,8 @@ public class MainFrame extends JFrame
       if (!connectionHandler.isRunning())
       {
         connectionHandler = new GridConnectionHandler(grid,
-                                                      ConnectionType.SIMPLE);
+                                                      ConnectionType.SIMPLE,
+                                                      userThreads);
       }
     });
     exeService = new JRadioButton("Executor Service");
@@ -102,7 +105,8 @@ public class MainFrame extends JFrame
       if (!connectionHandler.isRunning())
       {
         connectionHandler = new GridConnectionHandler(grid,
-                                                      ConnectionType.EXECUTOR);
+                                                      ConnectionType.EXECUTOR,
+                                                      userThreads);
       }
     });
     ButtonGroup group = new ButtonGroup();
@@ -124,6 +128,7 @@ public class MainFrame extends JFrame
       connectionHandler.stop();
       forkJoin.setEnabled(true);
       threaded.setEnabled(true);
+      exeService.setEnabled(true);
       playButton.setText("Play");
     }
     else
@@ -131,14 +136,14 @@ public class MainFrame extends JFrame
       connectionHandler.start();
       forkJoin.setEnabled(false);
       threaded.setEnabled(false);
-
+      exeService.setEnabled(false);
       playButton.setText("Pause");
     }
   }
 
   private void showOptionFrame ()
   {
-    ArrayList<File> bords = new ArrayList<>();
+    ArrayList<File> boards = new ArrayList<>();
 
 
     URL url = MainFrame.class.getResource("../../../assets/");
@@ -156,16 +161,16 @@ public class MainFrame extends JFrame
         e.printStackTrace();
       }
       for (File nextFile : dir.listFiles()) {
-        bords.add(nextFile);
+        boards.add(nextFile);
       }
     }
 
-    String[] names = new String[bords.size()];
-    for (int i = 0; i < bords.size(); i++)
+    String[] names = new String[boards.size()];
+    for (int i = 0; i < boards.size(); i++)
     {
-      int pos = bords.get(i).getName().lastIndexOf(".");
+      int pos = boards.get(i).getName().lastIndexOf(".");
       if(pos != -1) {
-        names[i] = bords.get(i).getName().substring(0, pos);
+        names[i] = boards.get(i).getName().substring(0, pos);
       }
 
     }
@@ -208,7 +213,7 @@ public class MainFrame extends JFrame
 
       int gridCols = Integer.parseInt(userGridXInput);
       int gridRows = Integer.parseInt(userGridYInput);
-      int userThreads = Integer.parseInt(userThreadsInput);
+      userThreads = Integer.parseInt(userThreadsInput);
       int itemIndex = presets.getSelectedIndex();
 
       // if they chose a file
@@ -219,7 +224,7 @@ public class MainFrame extends JFrame
         try
         {
 
-          serialized = s.decode(bords.get(itemIndex));
+          serialized = s.decode(boards.get(itemIndex));
 
           this.setTitle("Conway Game of Life - " + names[itemIndex]);
         }
@@ -236,7 +241,8 @@ public class MainFrame extends JFrame
         this.setTitle("Conway Game of Life");
       }
 
-      connectionHandler = new GridConnectionHandler(grid, ConnectionType.SIMPLE,
+      connectionHandler = new GridConnectionHandler(grid,
+                                                    ConnectionType.SIMPLE,
                                                     userThreads);
 
       panel.setConnectionHandler(null);

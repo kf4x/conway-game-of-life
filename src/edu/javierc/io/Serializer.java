@@ -26,79 +26,6 @@ public class Serializer
   private static char EOL = '$';
 
 
-  public Grid decode (InputStream file) throws Exception
-  {
-
-
-    String currentLine;
-
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(file)))
-    {
-
-      while ((currentLine = br.readLine()) != null) {
-        if (currentLine.startsWith("#")) { continue; }
-        if (currentLine.startsWith("x = ")) { break; }
-      }
-
-      int currentY = 0;
-      int currentX = 0;
-      int startX = 0;
-
-      String countStr = "";
-      int i = 0;
-      String board = "";
-      while ((currentLine = br.readLine()) != null)
-      {
-        board += currentLine;
-      }
-      for (char c : board.toCharArray())
-      {
-
-        if (c == DEAD)
-        {
-          currentX += (countStr.equals("") ? 1 : Integer.parseInt(countStr));
-          countStr = "";
-        }
-        else if (c == LIVE)
-        {
-          int count = (countStr.equals("") ? 1 : Integer.parseInt(countStr));
-          for (int j = 0; j < count; j++)
-          {
-            if (currentY < 1000 && currentX < 1000)
-            {
-              grid.setCell(true, currentX+1, currentY+1);
-
-            }
-            currentX++;
-          }
-          countStr = "";
-        }
-        else if (c == EOL)
-        {
-          currentX = startX;
-          currentY += (countStr.equals("") ? 1 : Integer.parseInt(countStr));
-          countStr = "";
-        }
-        else if (c == EOF)
-        {
-          break;
-        }
-        else
-        {
-          countStr += Integer.parseInt(board.substring(i, i + 1));
-        }
-        i++;
-      }
-
-    }
-
-    return grid;
-  }
-
-  private void handleLine (String line)
-  {
-
-  }
 
   public Grid decode (File file) throws Exception {
     String currentLine;
@@ -135,10 +62,9 @@ public class Serializer
           int count = (countStr.equals("") ? 1 : Integer.parseInt(countStr));
           for (int j = 0; j < count; j++)
           {
-            if (currentY < 1000 && currentX < 1000)
+            if (currentY < 2000 && currentX < 2000)
             {
               grid.setCell(true, currentX+1, currentY+1);
-
             }
             currentX++;
           }
