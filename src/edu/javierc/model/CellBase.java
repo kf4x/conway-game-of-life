@@ -1,5 +1,9 @@
 package edu.javierc.model;
 
+/**
+ * @author Javier Chavez
+ * Most basic representation of a cell
+ */
 
 public interface CellBase
 {

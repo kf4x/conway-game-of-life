@@ -1,8 +1,10 @@
 package edu.javierc.model;
 
 /**
- * Created by javierc on 8/31/15.
+ * @author Javier Chavez
+ * Available connection types
  */
+
 public enum ConnectionType
 {
   SIMPLE, FORK_JOIN, EXECUTOR

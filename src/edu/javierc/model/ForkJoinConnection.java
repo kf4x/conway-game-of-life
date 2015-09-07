@@ -1,20 +1,21 @@
 package edu.javierc.model;
+/**
+ * @author Javier Chavez
+ * This is the implementation using ForkJoin
+ */
 
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
-
 
 public class ForkJoinConnection extends Connection
 {
   private ForkJoinPool pool;
   private Grid grid;
-  private GridTask task;
+
   public ForkJoinConnection (Grid grid, int threads)
   {
     super(grid, threads);
     this.grid = grid;
     pool = new ForkJoinPool(threads);
-    this.task = new GridTask(grid);
   }
 
 
@@ -30,7 +31,7 @@ public class ForkJoinConnection extends Connection
   @Override
   public void step ()
   {
-    task = new GridTask(grid);
+    GridTask task = new GridTask(grid, 0, grid.getHeight() - 1);
     pool.invoke(task);
 
     synchronized (this)
@@ -41,5 +42,4 @@ public class ForkJoinConnection extends Connection
       }
     }
   }
-
 }

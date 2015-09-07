@@ -1,9 +1,19 @@
 package edu.javierc.io;
 /**
  * @author Javier Chavez
- * http://www.conwaylife.com/wiki/Run_Length_Encoded
- * http://copy.sh/life/
- * https://github.com/copy/life/tree/master/examples
+ * Class for serializing data. At this point the implementation only includes
+ * capability sufficient only for decoding a file into a real grid object.
+ * More information about reading in these types of files and examples of the
+ * file formats are in these links:
+ *  http://www.conwaylife.com/wiki/Run_Length_Encoded
+ *  http://copy.sh/life/
+ *  https://github.com/copy/life/tree/master/examples
+ *
+ * Useage:
+ * Can be treated as a POJO.
+ *
+ * Serializer s = new Serializer();
+ * grid = s.decode(file)
  *
  */
 
@@ -16,8 +26,8 @@ import java.io.*;
 
 public class Serializer
 {
-
   private Grid grid = new Grid(2000, 2000, false);
+
   // taken from RLE wiki
   private static int LINE = 70;
   private static char LIVE = 'o';
@@ -26,13 +36,18 @@ public class Serializer
   private static char EOL = '$';
 
 
-
+  /**
+   * Take a file and turn it into a Grid object
+   * @param file File object pointing to a RLE file
+   * @return Grid with its matrix filled
+   * @throws Exception
+   */
   public Grid decode (File file) throws Exception {
     String currentLine;
 
     try (BufferedReader br = new BufferedReader(new FileReader(file)))
     {
-
+      // skip all the lines that we are not using
       while ((currentLine = br.readLine()) != null) {
         if (currentLine.startsWith("#")) { continue; }
         if (currentLine.startsWith("x = ")) { break; }
@@ -41,25 +56,27 @@ public class Serializer
       int currentY = 0;
       int currentX = 0;
       int startX = 0;
-
-      String countStr = "";
       int i = 0;
+
+      String kNumber = ""; // The number of times block should be repeated.
       String board = "";
+
+      // convert the board to a long string
       while ((currentLine = br.readLine()) != null)
       {
         board += currentLine;
       }
+
       for (char c : board.toCharArray())
       {
-
         if (c == DEAD)
         {
-          currentX += (countStr.equals("") ? 1 : Integer.parseInt(countStr));
-          countStr = "";
+          currentX += (kNumber.equals("") ? 1 : Integer.parseInt(kNumber));
+          kNumber = "";
         }
         else if (c == LIVE)
         {
-          int count = (countStr.equals("") ? 1 : Integer.parseInt(countStr));
+          int count = (kNumber.equals("") ? 1 : Integer.parseInt(kNumber));
           for (int j = 0; j < count; j++)
           {
             if (currentY < 2000 && currentX < 2000)
@@ -68,13 +85,13 @@ public class Serializer
             }
             currentX++;
           }
-          countStr = "";
+          kNumber = "";
         }
         else if (c == EOL)
         {
           currentX = startX;
-          currentY += (countStr.equals("") ? 1 : Integer.parseInt(countStr));
-          countStr = "";
+          currentY += (kNumber.equals("") ? 1 : Integer.parseInt(kNumber));
+          kNumber = "";
         }
         else if (c == EOF)
         {
@@ -82,7 +99,7 @@ public class Serializer
         }
         else
         {
-          countStr += Integer.parseInt(board.substring(i, i + 1));
+          kNumber += Integer.parseInt(board.substring(i, i + 1));
         }
         i++;
       }
@@ -91,49 +108,4 @@ public class Serializer
 
     return grid;
   }
-
-  /**
-   * Method to turn a graph into a text file.
-   *
-   * @param graph Graph object that will be serialized
-   * @param file  File object containing path to file.
-   */
-//  public void encode (Graph graph, File file) throws Exception
-//  {
-//    FileWriter writer = new FileWriter(file);
-//
-//    StringBuilder graphString = new StringBuilder();
-//    List<List<Node>> matrix = graph.getMatrix();
-//    for (List<Node> nodeList : matrix)
-//    {
-//      for (Node node : nodeList)
-//      {
-//        graphString.append(node.getNodeType().getCode());
-//      }
-//      graphString.append("\n");
-//    }
-//
-//    writer.write(graphString.toString());
-//    writer.close();
-//
-//  }
-
-  /**
-   * A line should, not be > 40, but shall be > 5
-   *
-   * @param line just a plain String
-   * @return boolean true if string is proper length
-   */
-//  private boolean validateLine (char[] line)
-//  {
-//    if (line.length > MAX_CHARS || line.length < MIN_CHARS)
-//    {
-//      // System.out.println("line length = " + line.length);
-//      return false;
-//    }
-//    else
-//    {
-//      return true;
-//    }
-//  }
 }

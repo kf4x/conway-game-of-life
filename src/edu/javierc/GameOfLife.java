@@ -1,8 +1,12 @@
 package edu.javierc;
 
+/**
+ * @author Javier Chavez
+ * Enterence of the program. Contains main.
+ */
+
 import edu.javierc.view.MainFrame;
 import javax.swing.*;
-
 
 public class GameOfLife
 {

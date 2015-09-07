@@ -1,9 +1,9 @@
+package edu.javierc.view;
 /**
  * @author Javier Chavez
  * Main frame is the class containing the main wrapper frame that holds
  * controls, grid panel, and threads.
  */
-package edu.javierc.view;
 
 
 import edu.javierc.model.ConnectionType;
@@ -28,16 +28,14 @@ public class MainFrame extends JFrame
   private JButton nextButton = new JButton("Next");
   private JButton resetButton = new JButton("Reset");
   private JRadioButton threaded, forkJoin, exeService;
-  private int userThreads=4;
-
+  private int userThreads = 4;
+  private ArrayList<File> boards = new ArrayList<>();
 
   public MainFrame ()
   {
     init();
     grid = new Grid(2000, 2000);
-
-    connectionHandler = new GridConnectionHandler(grid,
-                                                  ConnectionType.SIMPLE);
+    connectionHandler = new GridConnectionHandler(grid, ConnectionType.SIMPLE);
     panel.setConnectionHandler(connectionHandler);
 
   }
@@ -47,7 +45,7 @@ public class MainFrame extends JFrame
    */
   private void init ()
   {
-//    grid = new Grid();
+    //    grid = new Grid();
     JMenu menu;
     JMenuItem menuItem;
 
@@ -65,9 +63,9 @@ public class MainFrame extends JFrame
     menuItem.addActionListener(e -> System.exit(0));
 
     menu.add(menuItem);
-    playButton.addActionListener(e -> start());
+    playButton.addActionListener(e -> toggleGame());
 
-
+    resetButton.addActionListener(e2 -> reset());
 
     menuBar.add(menu);
     menuBar.add(playButton);
@@ -79,36 +77,18 @@ public class MainFrame extends JFrame
 
     forkJoin = new JRadioButton("Fork Join");
     menuBar.add(forkJoin);
-    forkJoin.addActionListener(e -> {
-      if (!connectionHandler.isRunning())
-      {
-        connectionHandler = new GridConnectionHandler(grid,
-                                                      ConnectionType.FORK_JOIN,
-                                                      userThreads);
-      }
-    });
+    forkJoin.addActionListener(
+            e -> updateThreadConnection(ConnectionType.FORK_JOIN));
 
     threaded = new JRadioButton("Threaded");
     menuBar.add(threaded);
     threaded.setSelected(true);
-    threaded.addActionListener(e -> {
-      if (!connectionHandler.isRunning())
-      {
-        connectionHandler = new GridConnectionHandler(grid,
-                                                      ConnectionType.SIMPLE,
-                                                      userThreads);
-      }
-    });
+    threaded.addActionListener(
+            e -> updateThreadConnection(ConnectionType.SIMPLE));
     exeService = new JRadioButton("Executor Service");
     menuBar.add(exeService);
-    exeService.addActionListener(e -> {
-      if (!connectionHandler.isRunning())
-      {
-        connectionHandler = new GridConnectionHandler(grid,
-                                                      ConnectionType.EXECUTOR,
-                                                      userThreads);
-      }
-    });
+    exeService.addActionListener(
+            e -> updateThreadConnection(ConnectionType.EXECUTOR));
     ButtonGroup group = new ButtonGroup();
     group.add(forkJoin);
     group.add(threaded);
@@ -120,15 +100,29 @@ public class MainFrame extends JFrame
 
     pack();
 
+
   }
 
-  private void start ()
+  private void reset ()
   {
-    if (connectionHandler.isRunning()){
+    if (connectionHandler.isRunning())
+    {
+      toggleGame();
+    }
+    grid = new Grid(grid.getHeight(), grid.getWidth(), grid.isSeeded());
+    updateThreadConnection();
+  }
+
+  private void toggleGame ()
+  {
+    if (connectionHandler.isRunning())
+    {
       connectionHandler.stop();
       forkJoin.setEnabled(true);
       threaded.setEnabled(true);
       exeService.setEnabled(true);
+      resetButton.setEnabled(true);
+      nextButton.setEnabled(true);
       playButton.setText("Play");
     }
     else
@@ -137,20 +131,24 @@ public class MainFrame extends JFrame
       forkJoin.setEnabled(false);
       threaded.setEnabled(false);
       exeService.setEnabled(false);
+      resetButton.setEnabled(false);
+      nextButton.setEnabled(false);
       playButton.setText("Pause");
     }
   }
 
   private void showOptionFrame ()
   {
-    ArrayList<File> boards = new ArrayList<>();
 
+    boards = new ArrayList<>();
+    // this is very much a hack. I am not allowing users to pick the 0th
+    // element in the dropdown
+    boards.add(new File("Select.txt"));
 
     URL url = MainFrame.class.getResource("../../../assets/");
 
-    if (url == null) {
-      // error - missing folder
-    } else {
+    if (url != null)
+    {
       File dir = null;
       try
       {
@@ -160,7 +158,8 @@ public class MainFrame extends JFrame
       {
         e.printStackTrace();
       }
-      for (File nextFile : dir.listFiles()) {
+      for (File nextFile : dir.listFiles())
+      {
         boards.add(nextFile);
       }
     }
@@ -169,21 +168,27 @@ public class MainFrame extends JFrame
     for (int i = 0; i < boards.size(); i++)
     {
       int pos = boards.get(i).getName().lastIndexOf(".");
-      if(pos != -1) {
+      if (pos != -1)
+      {
         names[i] = boards.get(i).getName().substring(0, pos);
       }
-
     }
-    connectionHandler.stop();
+    if (connectionHandler.isRunning())
+    {
+      toggleGame();
+    }
 
     JButton button = new JButton("Save");
     JTextField threadNumberTextField = new JTextField("4", 3);
-    JTextField gridXTextField = new JTextField("2000", 3);
-    JTextField gridYTextField = new JTextField("2000", 3);
+    JTextField gridXTextField = new JTextField(String.valueOf(grid.getWidth()),
+                                               3);
+    JTextField gridYTextField = new JTextField(String.valueOf(grid.getHeight()),
+                                               3);
 
     JComboBox presets = new JComboBox(names);
 
-    final JFrame optionFrame = new JFrame();
+    final JFrame optionFrame = new JFrame("Options");
+    optionFrame.setPreferredSize(new Dimension(300, 150));
     GridLayout experimentLayout = new GridLayout(0, 3, 5, 0);
 
     optionFrame.setLayout(experimentLayout);
@@ -203,7 +208,7 @@ public class MainFrame extends JFrame
     optionFrame.setLocationRelativeTo(null); //center on screen
 
     button.addActionListener(e -> {
-      connectionHandler.stop();
+
       connectionHandler.removeConnection();
 
       // get the input
@@ -241,16 +246,45 @@ public class MainFrame extends JFrame
         this.setTitle("Conway Game of Life");
       }
 
-      connectionHandler = new GridConnectionHandler(grid,
-                                                    ConnectionType.SIMPLE,
-                                                    userThreads);
-
-      panel.setConnectionHandler(null);
-      panel.setConnectionHandler(connectionHandler);
+      updateThreadConnection();
 
       // get rid of the dialog
       optionFrame.dispose();
     });
   }
 
+  private void updateThreadConnection ()
+  {
+    updateThreadConnection(connectionHandler.getConnectionType());
+  }
+
+  private void updateThreadConnection (ConnectionType connectionType)
+  {
+
+    threaded.setSelected(false);
+    forkJoin.setSelected(false);
+    exeService.setSelected(false);
+
+    switch (connectionType)
+    {
+      case EXECUTOR:
+        exeService.setSelected(true);
+        break;
+      case SIMPLE:
+        threaded.setSelected(true);
+        break;
+      case FORK_JOIN:
+        forkJoin.setSelected(true);
+        break;
+      default:
+        System.out.println("[ERROR] Connection not found.");
+        break;
+    }
+
+    connectionHandler = new GridConnectionHandler(grid, connectionType,
+                                                  userThreads);
+
+    panel.setConnectionHandler(null);
+    panel.setConnectionHandler(connectionHandler);
+  }
 }

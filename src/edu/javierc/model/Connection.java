@@ -1,12 +1,16 @@
 package edu.javierc.model;
 
+/**
+ * @author Javier Chavez
+ *
+ */
+
 public abstract class Connection extends Thread
 {
   protected final int overflow;
   protected final int dy;
   protected int y;
   protected final int threads;
-  protected boolean step;
   protected Grid grid;
 
 
@@ -19,9 +23,7 @@ public abstract class Connection extends Thread
 
     int arrayLength = grid.getHeight();
     dy = (int) Math.ceil( ((double)arrayLength) / threads);
-    overflow = (arrayLength % dy); // + (dy * threads);
-    System.out.println(dy);
-    System.out.println(overflow);
+    overflow = (arrayLength % threads);
   }
 
 //  abstract boolean getCell (int x, int y);
