@@ -34,7 +34,7 @@ public class MainFrame extends JFrame
   public MainFrame ()
   {
     init();
-    grid = new Grid(2000, 2000);
+    grid = new Grid(2000, 2000, true);
     connectionHandler = new GridConnectionHandler(grid, ConnectionType.SIMPLE);
     panel.setConnectionHandler(connectionHandler);
 
@@ -233,16 +233,15 @@ public class MainFrame extends JFrame
 
           this.setTitle("Conway Game of Life - " + names[itemIndex]);
         }
-        catch (Exception e1)
-        {
-        }
+        catch (Exception e1) { }
 
-        grid = new Grid(gridCols, gridRows, false);
-        grid.mergeMatrix(serialized.getGrid(), 0, 0);
+        grid = new Grid(gridRows, gridCols, false);
+        grid.replaceMatrix(serialized.getGrid(), 10, 10);
+
       }
       else
       {
-        grid = new Grid(gridCols, gridRows);
+        grid = new Grid(gridCols, gridRows, true);
         this.setTitle("Conway Game of Life");
       }
 

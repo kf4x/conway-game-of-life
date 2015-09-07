@@ -22,11 +22,13 @@ import edu.javierc.model.Grid;
 
 import java.io.File;
 import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class Serializer
 {
-  private Grid grid = new Grid(2000, 2000, false);
+  // private Grid grid;// = new Grid(2000, 2000, false);
 
   // taken from RLE wiki
   private static int LINE = 70;
@@ -42,16 +44,38 @@ public class Serializer
    * @return Grid with its matrix filled
    * @throws Exception
    */
-  public Grid decode (File file) throws Exception {
+  public Grid decode (File file) throws IOException
+  {
     String currentLine;
+    int width = 0, height = 0;
+    Grid _grid = null;
 
     try (BufferedReader br = new BufferedReader(new FileReader(file)))
     {
       // skip all the lines that we are not using
       while ((currentLine = br.readLine()) != null) {
         if (currentLine.startsWith("#")) { continue; }
-        if (currentLine.startsWith("x = ")) { break; }
+        if (currentLine.startsWith("x = "))
+        {
+          for (String s : currentLine.split(","))
+          {
+            if (s.contains("x = "))
+            {
+              width = Integer.valueOf(s.replaceAll("\\D+", ""));
+            }
+            else if (s.contains("y = "))
+            {
+              height = Integer.valueOf(s.replaceAll("\\D+", ""));
+            }
+            else
+            {
+              break;
+            }
+          }
+          break;
+        }
       }
+      _grid = new Grid(height, width, false);
 
       int currentY = 0;
       int currentX = 0;
@@ -79,9 +103,9 @@ public class Serializer
           int count = (kNumber.equals("") ? 1 : Integer.parseInt(kNumber));
           for (int j = 0; j < count; j++)
           {
-            if (currentY < 2000 && currentX < 2000)
+            if (currentY < height && currentX < width)
             {
-              grid.setCell(true, currentX+1, currentY+1);
+              _grid.setCell(true, currentX, currentY);
             }
             currentX++;
           }
@@ -105,7 +129,6 @@ public class Serializer
       }
 
     }
-
-    return grid;
+    return _grid;
   }
 }
