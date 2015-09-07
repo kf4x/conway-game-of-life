@@ -42,7 +42,6 @@ public class Grid
     displayGraph = new boolean[rows][cols];
     volatileGraph = new boolean[rows][cols];
 
-    seed();
   }
 
   /**
@@ -53,10 +52,7 @@ public class Grid
    */
   public Grid (int rows, int cols, boolean seedGrid)
   {
-    this.rows = rows;
-    this.cols = cols;
-    displayGraph = new boolean[rows][cols];
-    volatileGraph = new boolean[rows][cols];
+    this(rows, cols);
 
     if (seedGrid)
     {
@@ -116,7 +112,7 @@ public class Grid
    */
   public void mergeGrid(Grid grid)
   {
-    this.mergeMatrix(grid.getGrid(), 0, 0);
+    this.replaceMatrix(grid.getGrid(), 0, 0);
   }
 
   /**
@@ -125,7 +121,7 @@ public class Grid
    * @param x column offset (from top left)
    * @param y row offset (from top left)
    */
-  public void mergeMatrix(boolean[][] matrix, int x, int y)
+  public void replaceMatrix (boolean[][] matrix, int x, int y)
   {
     int height = matrix.length;
     int width = matrix[0].length;
@@ -139,6 +135,8 @@ public class Grid
 
     this.rows = Math.max(height, rows);
     this.cols = Math.max(width, cols);
+    displayGraph = new boolean[rows][cols];
+    volatileGraph = new boolean[rows][cols];
 
     for (int i = y; i < height; i++)
     {
@@ -324,5 +322,11 @@ public class Grid
   public boolean isSeeded ()
   {
     return seeded;
+  }
+
+  @Override
+  public String toString ()
+  {
+    return this.getWidth() + " " + this.getHeight();
   }
 }
